@@ -1,0 +1,267 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap');
+
+/* ─── DESIGN TOKENS ──────────────────────────────────────────────────────── */
+:root {
+  --forest:       #162d20;
+  --forest-mid:   #1e3d2c;
+  --forest-light: #2a5240;
+  --cream:        #f4efe6;
+  --cream-dark:   #ebe4d8;
+  --terra:        #e8732a;
+  --terra-light:  #f0924f;
+  --teal:         #2d7a6e;
+  --teal-light:   #3d9e90;
+  --red:          #c94040;
+  --gold:         #d4a843;
+  --purple:       #7c5cbf;
+  --text-dark:    #1a2b22;
+  --text-mid:     #3d5248;
+  --text-light:   #7a9186;
+  --border:       #ddd5c8;
+  --card:         #ffffff;
+  --shadow:       0 2px 12px rgba(22, 45, 32, 0.10);
+  --shadow-lg:    0 8px 32px rgba(22, 45, 32, 0.16);
+}
+
+/* ─── RESET ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body   { font-family: 'Nunito', sans-serif; background: var(--cream); color: var(--text-dark); }
+button { font-family: inherit; }
+
+/* ─── LAYOUT ─────────────────────────────────────────────────────────────── */
+.app   { min-height: 100vh; display: flex; flex-direction: column; }
+.main  { flex: 1; padding: 20px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+/* ─── TOP BAR ────────────────────────────────────────────────────────────── */
+.topbar {
+  background: var(--forest);
+  color: white;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+}
+.topbar-brand  { display: flex; align-items: center; gap: 10px; }
+.topbar-logo   {
+  width: 34px; height: 34px;
+  background: var(--terra);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800; font-size: 16px; color: white;
+}
+.topbar-title  { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
+.topbar-sub    { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+.topbar-right  { display: flex; align-items: center; gap: 12px; }
+
+/* ─── SYNC BADGE ─────────────────────────────────────────────────────────── */
+.sync-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+}
+.sync-badge.offline { background: rgba(201,64,64,0.2);  color: #ff8080; border-color: rgba(201,64,64,0.3); }
+.sync-badge.online  { background: rgba(45,122,110,0.2); color: #5ce0cc; border-color: rgba(45,122,110,0.3); }
+.sync-badge.syncing { background: rgba(212,168,67,0.2); color: #ffd080; border-color: rgba(212,168,67,0.3); animation: pulse 1s infinite; }
+.sync-badge.error   { background: rgba(201,64,64,0.2);  color: #ffaaaa; border-color: rgba(201,64,64,0.3); }
+
+.pending-badge {
+  background: var(--terra); color: white;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ─── OFFLINE BANNER ─────────────────────────────────────────────────────── */
+.offline-banner {
+  background: rgba(201,64,64,0.1);
+  border-bottom: 1px solid rgba(201,64,64,0.2);
+  padding: 6px 24px;
+  font-size: 12px; font-weight: 600;
+  color: var(--red);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ─── TAB BAR ────────────────────────────────────────────────────────────── */
+.tab-bar { background: var(--forest-mid); display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.tab-btn {
+  flex: 1; padding: 13px 8px;
+  background: none; border: none;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+  position: relative; top: 1px;
+}
+.tab-btn.active          { color: var(--terra); border-bottom-color: var(--terra); background: rgba(232,115,42,0.07); }
+.tab-btn:hover:not(.active) { color: rgba(255,255,255,0.8); }
+
+/* ─── STAT CARDS ─────────────────────────────────────────────────────────── */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--card); border-radius: 14px;
+  padding: 16px 18px; box-shadow: var(--shadow);
+  border-left: 4px solid transparent;
+  transition: transform 0.15s;
+}
+.stat-card:hover     { transform: translateY(-2px); }
+.stat-card.terra     { border-left-color: var(--terra); }
+.stat-card.teal      { border-left-color: var(--teal);  }
+.stat-card.red       { border-left-color: var(--red);   }
+.stat-card.gold      { border-left-color: var(--gold);  }
+.stat-label  { font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.stat-value  { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: var(--text-dark); line-height: 1; }
+.stat-sub    { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+/* ─── SECTION HEADER ─────────────────────────────────────────────────────── */
+.section-header    { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-title     { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+.section-title-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--terra); }
+
+/* ─── BUTTONS ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border-radius: 10px;
+  font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.15s;
+}
+.btn-primary:hover  { background: var(--terra-light); transform: translateY(-1px); }
+.btn-primary        { background: var(--terra);        color: white; }
+.btn-teal           { background: var(--teal);          color: white; }
+.btn-teal:hover     { background: var(--teal-light); }
+.btn-ghost          { background: transparent; color: var(--text-mid); border: 1px solid var(--border); }
+.btn-ghost:hover    { background: var(--cream-dark); }
+.btn-sm             { padding: 6px 12px; font-size: 12px; }
+.btn:disabled       { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ─── PATIENT CARDS ──────────────────────────────────────────────────────── */
+.patient-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.patient-card {
+  background: var(--card); border-radius: 14px;
+  padding: 16px 18px; box-shadow: var(--shadow);
+  cursor: pointer; transition: all 0.15s;
+  border: 2px solid transparent; position: relative;
+}
+.patient-card:hover      { box-shadow: var(--shadow-lg); border-color: var(--terra); transform: translateY(-1px); }
+.patient-card.active     { border-color: var(--terra); background: #fff8f3; }
+.patient-card-header     { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.patient-name            { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; color: var(--text-dark); }
+.patient-meta            { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.condition-tag           { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; color: white; }
+.unsync-dot              { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px rgba(212,168,67,0.6); }
+.patient-vitals          { display: flex; gap: 12px; flex-wrap: wrap; }
+.vital-chip              { display: flex; align-items: center; gap: 5px; background: var(--cream); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-mid); }
+.vital-chip.warning      { background: #fff0eb; color: var(--terra); }
+.vital-chip.danger       { background: #ffebeb; color: var(--red);   }
+
+/* ─── SEARCH ─────────────────────────────────────────────────────────────── */
+.search-wrap  { position: relative; margin-bottom: 16px; }
+.search-input {
+  width: 100%; padding: 10px 16px 10px 40px;
+  border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--card);
+  font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text-dark);
+  outline: none; transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--terra); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
+
+/* ─── PATIENT DETAIL ─────────────────────────────────────────────────────── */
+.detail-panel          { background: var(--card); border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.detail-header         { background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%); padding: 22px 24px; color: white; }
+.detail-name           { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; }
+.detail-meta           { font-size: 13px; opacity: 0.7; margin-top: 4px; }
+.detail-tags           { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.detail-tag            { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.15); color: white; }
+.detail-tag.highlight  { background: var(--terra); }
+.detail-body           { padding: 20px 24px; }
+.detail-section-title  { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-light); margin-bottom: 10px; margin-top: 16px; }
+.vitals-grid           { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.vital-box             { background: var(--cream); border-radius: 10px; padding: 12px; text-align: center; }
+.vital-box-label       { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-light); }
+.vital-box-value       { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; color: var(--text-dark); line-height: 1.2; margin-top: 2px; }
+.vital-box-unit        { font-size: 10px; color: var(--text-light); }
+
+/* ─── VACCINE CHIPS ──────────────────────────────────────────────────────── */
+.vaccine-grid         { display: flex; flex-wrap: wrap; gap: 8px; }
+.vaccine-chip         { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 2px solid; cursor: pointer; }
+.vaccine-chip.done    { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+.vaccine-chip.pending { background: var(--cream); border-color: var(--border); color: var(--text-light); }
+
+/* ─── PREGNANCY BAR ──────────────────────────────────────────────────────── */
+.preg-bar  { height: 10px; background: var(--cream-dark); border-radius: 5px; overflow: hidden; margin: 8px 0; }
+.preg-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--teal), var(--terra)); }
+
+/* ─── CHART CARDS ────────────────────────────────────────────────────────── */
+.chart-card  { background: var(--card); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.chart-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text-dark); }
+.dash-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ─── VILLAGE TABLE ──────────────────────────────────────────────────────── */
+.village-table     { width: 100%; border-collapse: collapse; }
+.village-table th  { text-align: left; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-light); padding: 8px 12px; border-bottom: 2px solid var(--border); }
+.village-table td  { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid var(--cream-dark); color: var(--text-mid); }
+.village-table tr:hover td { background: var(--cream); }
+.progress-bar  { height: 6px; border-radius: 3px; background: var(--cream-dark); overflow: hidden; width: 80px; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--teal); }
+
+/* ─── MODAL / FORM ───────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(22,45,32,0.6); backdrop-filter: blur(4px);
+  z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.modal        { background: var(--card); border-radius: 18px; padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-title  { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.form-group   { margin-bottom: 14px; }
+.form-label   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-light); margin-bottom: 5px; display: block; }
+.form-input   { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text-dark); background: var(--cream); outline: none; transition: border-color 0.15s; }
+.form-input:focus  { border-color: var(--terra); background: white; }
+.form-row     { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+/* ─── BANNERS ────────────────────────────────────────────────────────────── */
+.alert-banner   { background: #fff3ed; border: 1.5px solid #f5c6a0; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #8b4513; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.success-banner { background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #2e7d32; display: flex; align-items: center; gap: 8px; }
+
+/* ─── TOAST ──────────────────────────────────────────────────────────────── */
+.toast         { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 12px; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 300; animation: slideUp 0.3s ease; }
+.toast.success { background: #2e7d32; color: white; }
+.toast.error   { background: #c62828; color: white; }
+.toast.info    { background: var(--forest); color: white; }
+
+/* ─── ANIMATIONS ─────────────────────────────────────────────────────────── */
+@keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:0.6} }
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .stat-grid    { grid-template-columns: 1fr 1fr; }
+  .patient-grid { grid-template-columns: 1fr; }
+  .dash-grid    { grid-template-columns: 1fr; }
+  .vitals-grid  { grid-template-columns: 1fr 1fr; }
+  .form-row     { grid-template-columns: 1fr; }
+}
