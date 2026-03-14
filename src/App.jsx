@@ -1,8 +1,8 @@
 import { AuthProvider, useAuth } from "./auth/Authcontext";
 import { LanguageProvider } from "./context/LanguageContext";
-import LoginPage          from "./pages/LoginPage";
-import AshaDashboard      from "./views/AshaDashboard";
-import SupervisorDashboard from "./views/SupervisorDashboard";
+import LoginPage          from "./pages/loginpage";
+import AshaDashboard      from "./views/ashadashboard";
+import SupervisorDashboard from "./views/supervisordashboard";
 
 function AppRouter() {
   const { user } = useAuth();

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import AshaTopBar from "../components/ashatopbar";
-import PatientCard from "../components/PatientCard";
+import PatientCard from "../components/patientcard";
 import PatientDetail from "../components/patientdetails";
 import AddPatientModal from "../components/addpatientmodel";
-import Icon from "../components/Icon";
-import Toast from "../components/Toast";
+import Icon from "../components/icon";
+import Toast from "../components/toast";
 import { useAuth } from "../auth/Authcontext";
 import { loadPatients, savePatients, saveAshaPatients } from "../utils/storage";
 import { syncToServer } from "../utils/sync";

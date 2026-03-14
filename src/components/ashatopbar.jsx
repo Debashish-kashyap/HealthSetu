@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../auth/Authcontext";
 import { useLanguage } from "../context/LanguageContext";
-import Icon from "./Icon";
+import Icon from "./icon";
 
 export default function AshaTopBar({ online, syncing, syncError, pendingSync, onSync }) {
   const { user, logout } = useAuth();

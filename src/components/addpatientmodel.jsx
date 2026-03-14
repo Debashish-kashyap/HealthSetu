@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Icon from "./Icon";
+import Icon from "./icon";
 import { VILLAGES, CONDITIONS } from "../Config";
 import { generatePatientId, todayLabel, todayISO } from "../utils/helpers";
 import { useLanguage } from "../context/LanguageContext";
