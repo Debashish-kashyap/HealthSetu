@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useAuth } from "../auth/authcontext";
+import { useLanguage } from "../context/LanguageContext";
 import Icon from "./Icon";
 
 export default function AshaTopBar({ online, syncing, syncError, pendingSync, onSync }) {
   const { user, logout } = useAuth();
+  const { t, toggleLanguage, language } = useLanguage();
   const [showMenu, setShowMenu] = useState(false);
 
-  const syncLabel = syncing ? "Syncing…"
-    : syncError   ? "Retry"
-    : online       ? (pendingSync > 0 ? `Sync ${pendingSync}` : "All Synced ✓")
-    : "Offline";
+  const syncLabel = syncing ? t("topbar.syncing")
+    : syncError   ? t("topbar.retry")
+    : online       ? (pendingSync > 0 ? `${t("topbar.sync")} ${pendingSync}` : t("topbar.allSynced"))
+    : t("topbar.offline");
 
   const syncClass = syncing ? "syncing"
     : syncError   ? "error"
@@ -17,18 +19,27 @@ export default function AshaTopBar({ online, syncing, syncError, pendingSync, on
     : "offline";
 
   return (
-    <header style={S.bar}>
+    <header className="top-bar" style={S.bar}>
+      <style>{`
+        @media(max-width: 600px){
+          .hide-mobile { display: none !important; }
+          .top-bar { padding: 10px 16px !important; }
+        }
+      `}</style>
       {/* Brand */}
       <div style={S.brand}>
         <div style={S.logo}>HS</div>
         <div>
-          <div style={S.title}>HealthSetu NER</div>
-          <div style={S.sub}>ASHA Field App · {user?.village}</div>
+          <div style={S.title}>{t("app.title")}</div>
+          <div className="hide-mobile" style={S.sub}>{t("app.subtitle.asha")} · {user?.village}</div>
         </div>
       </div>
 
       {/* Right controls */}
       <div style={S.right}>
+        <button onClick={toggleLanguage} style={S.langSwitcher}>
+          {language === "en" ? "A / অ" : "A / EN"}
+        </button>
         {/* Network + sync badge */}
         {pendingSync > 0 && (
           <div style={S.pendingBadge}>{pendingSync}</div>
@@ -49,10 +60,10 @@ export default function AshaTopBar({ online, syncing, syncError, pendingSync, on
           </button>
           {showMenu && (
             <div style={S.menu}>
-              <div style={S.menuName}>{user?.name}</div>
-              <div style={S.menuRole}>ASHA Worker · {user?.village}</div>
+              <div style={S.menuName}>{user?.role === "asha" && user?.username === "asha_priya" ? t("name.asha_priya") : user?.role === "asha" && user?.username === "asha_manju" ? t("name.asha_manju") : user?.name}</div>
+              <div style={S.menuRole}>{t("asha.role")} · {user?.village}</div>
               <div style={S.menuDivider} />
-              <button style={S.menuItem} onClick={logout}>🚪 Sign Out</button>
+              <button style={S.menuItem} onClick={logout}>{t("topbar.signOut")}</button>
             </div>
           )}
         </div>
@@ -64,8 +75,9 @@ export default function AshaTopBar({ online, syncing, syncError, pendingSync, on
 const S = {
   bar: {
     background: "#162d20", color: "white",
-    padding: "0 24px", height: 60,
+    padding: "10px 24px", minHeight: 60,
     display: "flex", alignItems: "center", justifyContent: "space-between",
+    flexWrap: "wrap", gap: 10,
     position: "sticky", top: 0, zIndex: 100,
     boxShadow: "0 2px 16px rgba(0,0,0,0.25)",
     fontFamily: "'Nunito', sans-serif",
@@ -91,6 +103,18 @@ const S = {
     color: "white", fontFamily: "'Sora',sans-serif",
     fontSize: 12, fontWeight: 700, cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center",
+  },
+  langSwitcher: {
+    background: "rgba(255,255,255,0.1)",
+    border: "1px solid rgba(255,255,255,0.2)",
+    color: "white",
+    padding: "5px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontFamily: "'Sora', sans-serif",
+    fontSize: 12,
+    fontWeight: 700,
+    transition: "all 0.2s"
   },
   menu: {
     position: "absolute", right: 0, top: "calc(100% + 8px)",

@@ -46,6 +46,27 @@ export const DEMO_USERS = [
 ];
 
 const AUTH_STORAGE_KEY = "healthsetu_auth";
+const REGISTERED_USERS_KEY = "healthsetu_registered_users";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+function getRegisteredUsers() {
+  try {
+    const raw = localStorage.getItem(REGISTERED_USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRegisteredUsers(users) {
+  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
+}
+
+function makeAvatar(name) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
 
 // ─── Context ──────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
@@ -61,6 +82,7 @@ export function AuthProvider({ children }) {
   });
 
   const [loginError, setLoginError] = useState("");
+  const [registerError, setRegisterError] = useState("");
 
   // Persist session across refreshes
   useEffect(() => {
@@ -71,18 +93,88 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  function login(username, password) {
+  function login(identifier, password) {
     setLoginError("");
-    const found = DEMO_USERS.find(
-      (u) => u.username === username.trim() && u.password === password
+
+    const idTrim = identifier.trim();
+    const idNum = idTrim.replace(/\D/g, "");
+
+    // 1. Check demo users (match by username OR phone)
+    const demoMatch = DEMO_USERS.find(
+      (u) =>
+        (u.username === idTrim || (idNum && u.phone && u.phone.replace(/\D/g, "") === idNum)) &&
+        u.password === password
     );
-    if (found) {
-      const { password: _, ...safeUser } = found; // never store password
+    if (demoMatch) {
+      const { password: _, ...safeUser } = demoMatch;
       setUser(safeUser);
       return true;
     }
-    setLoginError("Invalid username or password. Please try again.");
+
+    // 2. Check registered users (match by phone)
+    const registered = getRegisteredUsers();
+    const regMatch = registered.find(
+      (u) =>
+        (u.username === idTrim || u.phone === idTrim || (idNum && u.phone && u.phone.replace(/\D/g, "") === idNum)) &&
+        u.password === password
+    );
+    if (regMatch) {
+      const { password: _, ...safeUser } = regMatch;
+      setUser(safeUser);
+      return true;
+    }
+
+    setLoginError("Invalid username/phone or password. Please try again.");
     return false;
+  }
+
+  function register({ name, phone, password, village }) {
+    setRegisterError("");
+
+    // Validation
+    if (!name.trim() || name.trim().length < 2) {
+      setRegisterError("Please enter your full name.");
+      return false;
+    }
+    const phoneNum = phone.trim().replace(/\D/g, "");
+    if (!phoneNum || phoneNum.length < 10) {
+      setRegisterError("Please enter a valid phone number (at least 10 digits).");
+      return false;
+    }
+    if (!password || password.length < 4) {
+      setRegisterError("Password must be at least 4 characters.");
+      return false;
+    }
+
+    // Check for duplicate phone
+    const existing = getRegisteredUsers();
+    const demoPhoneMatch = DEMO_USERS.find((u) => u.phone && u.phone.replace(/\D/g, "") === phoneNum);
+    const regPhoneMatch = existing.find((u) => u.phone && u.phone.replace(/\D/g, "") === phoneNum);
+    if (demoPhoneMatch || regPhoneMatch) {
+      setRegisterError("This phone number is already registered. Please sign in.");
+      return false;
+    }
+
+    // Create new user
+    const newUser = {
+      id: `A${Date.now().toString(36).toUpperCase()}`,
+      name: name.trim(),
+      username: `asha_${phone.trim().replace(/\D/g, "").slice(-5)}`,
+      phone: phone.trim(),
+      password,
+      role: "asha",
+      village: village || "Haflong",
+      avatar: makeAvatar(name),
+    };
+
+    // Save to localStorage
+    const updated = [...existing, newUser];
+    saveRegisteredUsers(updated);
+
+    // Auto-login
+    const { password: _, ...safeUser } = newUser;
+    setUser(safeUser);
+    return true;
   }
 
   function logout() {
@@ -90,7 +182,18 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginError, setLoginError }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        register,
+        loginError,
+        setLoginError,
+        registerError,
+        setRegisterError,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import Icon from "./icon";
+import Icon from "./Icon";
 import { VILLAGES, CONDITIONS } from "../Config";
 import { generatePatientId, todayLabel, todayISO } from "../utils/helpers";
+import { useLanguage } from "../context/LanguageContext";
 
 const INITIAL_FORM = {
   name: "", age: "", gender: "F", village: "Haflong",
@@ -10,6 +11,7 @@ const INITIAL_FORM = {
 
 export default function AddPatientModal({ onClose, onAdd }) {
   const [form, setForm] = useState(INITIAL_FORM);
+  const { t } = useLanguage();
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -45,78 +47,78 @@ export default function AddPatientModal({ onClose, onAdd }) {
       <div className="modal">
         <div className="modal-title">
           <Icon name="plus" size={22} color="var(--terra)" />
-          New Patient Profile
+          {t("form.title")}
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Full Name *</label>
-            <input className="form-input" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Patient name" />
+            <label className="form-label">{t("form.fullName")}</label>
+            <input className="form-input" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder={t("form.namePlaceholder")} />
           </div>
           <div className="form-group">
-            <label className="form-label">Age *</label>
-            <input className="form-input" type="number" value={form.age} onChange={(e) => set("age", e.target.value)} placeholder="Years" />
+            <label className="form-label">{t("form.age")}</label>
+            <input className="form-input" type="number" value={form.age} onChange={(e) => set("age", e.target.value)} placeholder={t("form.agePlaceholder")} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Gender</label>
+            <label className="form-label">{t("form.gender")}</label>
             <select className="form-input" value={form.gender} onChange={(e) => set("gender", e.target.value)}>
-              <option value="F">Female</option>
-              <option value="M">Male</option>
-              <option value="O">Other</option>
+              <option value="F">{t("form.gender.female")}</option>
+              <option value="M">{t("form.gender.male")}</option>
+              <option value="O">{t("form.gender.other")}</option>
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Village</label>
+            <label className="form-label">{t("form.village")}</label>
             <select className="form-input" value={form.village} onChange={(e) => set("village", e.target.value)}>
-              {VILLAGES.map((v) => <option key={v}>{v}</option>)}
+              {VILLAGES.map((v) => <option key={v} value={v}>{t(`village.${v.toLowerCase()}`)}</option>)}
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Phone</label>
-            <input className="form-input" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="Mobile number" />
+            <label className="form-label">{t("form.phone")}</label>
+            <input className="form-input" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder={t("form.phonePlaceholder")} />
           </div>
           <div className="form-group">
-            <label className="form-label">Condition</label>
+            <label className="form-label">{t("form.condition")}</label>
             <select className="form-input" value={form.condition} onChange={(e) => set("condition", e.target.value)}>
-              {CONDITIONS.map((c) => <option key={c}>{c}</option>)}
+              {CONDITIONS.map((c) => <option key={c} value={c}>{t(`cond.${c.toLowerCase()}`)}</option>)}
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Blood Pressure</label>
+            <label className="form-label">{t("form.bp")}</label>
             <input className="form-input" value={form.bp} onChange={(e) => set("bp", e.target.value)} placeholder="120/80" />
           </div>
           <div className="form-group">
-            <label className="form-label">Temperature °F</label>
+            <label className="form-label">{t("form.temp")}</label>
             <input className="form-input" type="number" step="0.1" value={form.temp} onChange={(e) => set("temp", e.target.value)} placeholder="98.6" />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Weight (kg)</label>
+            <label className="form-label">{t("form.weight")}</label>
             <input className="form-input" type="number" value={form.weight} onChange={(e) => set("weight", e.target.value)} placeholder="60" />
           </div>
           {form.condition === "Pregnancy" && (
             <div className="form-group">
-              <label className="form-label">Pregnancy Week</label>
+              <label className="form-label">{t("form.pregWeek")}</label>
               <input className="form-input" type="number" value={form.pregnancyWeek} onChange={(e) => set("pregnancyWeek", e.target.value)} placeholder="1–40" />
             </div>
           )}
         </div>
 
         <div className="form-actions">
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-ghost" onClick={onClose}>{t("form.cancel")}</button>
           <button className="btn btn-primary" onClick={handleAdd} disabled={!form.name || !form.age}>
-            <Icon name="check" size={15} /> Create Profile
+            <Icon name="check" size={15} /> {t("form.create")}
           </button>
         </div>
       </div>

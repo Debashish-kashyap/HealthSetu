@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth, DEMO_USERS } from "../auth/authcontext";
+import { VILLAGES } from "../Config";
 
 // ─── Quick-fill helper shown during hackathon demo ────────────────────────
 const QUICK_LOGINS = [
@@ -8,19 +9,63 @@ const QUICK_LOGINS = [
 ];
 
 export default function LoginPage() {
-  const { login, loginError, setLoginError } = useAuth();
-  const [username, setUsername] = useState("");
+  const { login, loginError, setLoginError, register, registerError, setRegisterError } = useAuth();
+
+  // Mode: "login" or "signup"
+  const [mode, setMode] = useState("login");
+
+  // Login fields
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [loading,  setLoading]  = useState(false);
-  const [shake,    setShake]    = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [shake, setShake] = useState(false);
 
-  async function handleSubmit(e) {
+  // Sign-up fields
+  const [signupName, setSignupName] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
+  const [signupVillage, setSignupVillage] = useState("Haflong");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirm, setSignupConfirm] = useState("");
+
+  function switchMode(newMode) {
+    setMode(newMode);
+    setLoginError("");
+    setRegisterError("");
+    setShake(false);
+  }
+
+  async function handleLogin(e) {
     e.preventDefault();
     setLoading(true);
-    // Simulate a brief network call for realism
     await new Promise((r) => setTimeout(r, 600));
-    const ok = login(username, password);
+    const ok = login(identifier, password);
+    if (!ok) {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
+    setLoading(false);
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    setRegisterError("");
+
+    if (signupPassword !== signupConfirm) {
+      setRegisterError("Passwords do not match.");
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 600));
+    const ok = register({
+      name: signupName,
+      phone: signupPhone,
+      password: signupPassword,
+      village: signupVillage,
+    });
     if (!ok) {
       setShake(true);
       setTimeout(() => setShake(false), 500);
@@ -29,7 +74,7 @@ export default function LoginPage() {
   }
 
   function quickFill(u, p) {
-    setUsername(u);
+    setIdentifier(u);
     setPassword(p);
     setLoginError("");
   }
@@ -75,90 +120,212 @@ export default function LoginPage() {
       {/* ── Right form panel ── */}
       <div style={S.formPanel}>
         <div style={{ ...S.formCard, ...(shake ? { animation:"shake 0.4s ease" } : {}) }}>
-          <h2 style={S.formTitle}>Welcome back</h2>
-          <p style={S.formSub}>Sign in to your HealthSetu account</p>
 
-          {/* Quick-login buttons */}
-          <div style={S.quickRow}>
-            <span style={S.quickLabel}>Quick demo login →</span>
-            {QUICK_LOGINS.map((q) => (
-              <button
-                key={q.username}
-                type="button"
-                style={{ ...S.quickBtn, borderColor: q.color, color: q.color }}
-                onClick={() => quickFill(q.username, q.password)}
-              >
-                {q.icon} {q.label}
-              </button>
-            ))}
-          </div>
+          {/* ═══════════════════ LOGIN MODE ═══════════════════ */}
+          {mode === "login" && (
+            <>
+              <h2 style={S.formTitle}>Welcome back</h2>
+              <p style={S.formSub}>Sign in to your HealthSetu account</p>
 
-          <div style={S.divider}><span style={S.dividerText}>or enter credentials</span></div>
-
-          <form onSubmit={handleSubmit}>
-            {/* Username */}
-            <div style={S.fieldGroup}>
-              <label style={S.label}>Username</label>
-              <div style={S.inputWrap}>
-                <span style={S.inputIcon}>👤</span>
-                <input
-                  style={S.input}
-                  type="text"
-                  value={username}
-                  onChange={(e) => { setUsername(e.target.value); setLoginError(""); }}
-                  placeholder="e.g. asha_priya"
-                  autoComplete="username"
-                  required
-                />
+              {/* Quick-login buttons */}
+              <div style={S.quickRow}>
+                <span style={S.quickLabel}>Quick demo login →</span>
+                {QUICK_LOGINS.map((q) => (
+                  <button
+                    key={q.username}
+                    type="button"
+                    style={{ ...S.quickBtn, borderColor: q.color, color: q.color }}
+                    onClick={() => quickFill(q.username, q.password)}
+                  >
+                    {q.icon} {q.label}
+                  </button>
+                ))}
               </div>
-            </div>
 
-            {/* Password */}
-            <div style={S.fieldGroup}>
-              <label style={S.label}>Password</label>
-              <div style={S.inputWrap}>
-                <span style={S.inputIcon}>🔒</span>
-                <input
-                  style={S.input}
-                  type={showPass ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setLoginError(""); }}
-                  placeholder="Enter password"
-                  autoComplete="current-password"
-                  required
-                />
-                <button
-                  type="button"
-                  style={S.eyeBtn}
-                  onClick={() => setShowPass((v) => !v)}
-                  tabIndex={-1}
-                >
-                  {showPass ? "🙈" : "👁️"}
+              <div style={S.divider}><span style={S.dividerText}>or enter credentials</span></div>
+
+              <form onSubmit={handleLogin}>
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Username or Phone</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>👤</span>
+                    <input
+                      style={S.input}
+                      type="text"
+                      value={identifier}
+                      onChange={(e) => { setIdentifier(e.target.value); setLoginError(""); }}
+                      placeholder="e.g. asha_priya or 9436011111"
+                      autoComplete="username"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Password</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>🔒</span>
+                    <input
+                      style={S.input}
+                      type={showPass ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); setLoginError(""); }}
+                      placeholder="Enter password"
+                      autoComplete="current-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      style={S.eyeBtn}
+                      onClick={() => setShowPass((v) => !v)}
+                      tabIndex={-1}
+                    >
+                      {showPass ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </div>
+
+                {loginError && (
+                  <div style={S.errorBanner}>⚠️ {loginError}</div>
+                )}
+
+                <button type="submit" style={S.submitBtn} disabled={loading}>
+                  {loading ? <span style={S.spinner} /> : "Sign In →"}
+                </button>
+              </form>
+
+              {/* Switch to sign-up */}
+              <div style={S.switchRow}>
+                ASHA worker? Don't have an account?{" "}
+                <button style={S.switchBtn} onClick={() => switchMode("signup")}>
+                  Sign Up
                 </button>
               </div>
-            </div>
 
-            {/* Error */}
-            {loginError && (
-              <div style={S.errorBanner}>
-                ⚠️ {loginError}
+              {/* Credentials hint */}
+              <div style={S.hint}>
+                <strong>Demo accounts</strong><br />
+                ASHA: <code>asha_priya</code> / <code>asha123</code><br />
+                Supervisor: <code>supervisor_ratan</code> / <code>super123</code>
               </div>
-            )}
+            </>
+          )}
 
-            {/* Submit */}
-            <button type="submit" style={S.submitBtn} disabled={loading}>
-              {loading
-                ? <span style={S.spinner} />
-                : "Sign In →"}
-            </button>
-          </form>
+          {/* ═══════════════════ SIGNUP MODE ═══════════════════ */}
+          {mode === "signup" && (
+            <>
+              <h2 style={S.formTitle}>Create Account</h2>
+              <p style={S.formSub}>Register as an ASHA worker to get started</p>
 
-          {/* Credentials hint */}
-          <div style={S.hint}>
-            <strong>Demo accounts</strong><br />
-            ASHA: <code>asha_priya</code> / <code>asha123</code><br />
-            Supervisor: <code>supervisor_ratan</code> / <code>super123</code>
-          </div>
+              <form onSubmit={handleSignup}>
+                {/* Full Name */}
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Full Name</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>👤</span>
+                    <input
+                      style={S.input}
+                      type="text"
+                      value={signupName}
+                      onChange={(e) => { setSignupName(e.target.value); setRegisterError(""); }}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Phone Number */}
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Phone Number</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>📱</span>
+                    <input
+                      style={S.input}
+                      type="tel"
+                      value={signupPhone}
+                      onChange={(e) => { setSignupPhone(e.target.value); setRegisterError(""); }}
+                      placeholder="e.g. 9436012345"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Village */}
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Village</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>🏘️</span>
+                    <select
+                      style={{ ...S.input, paddingLeft: 40, cursor: "pointer" }}
+                      value={signupVillage}
+                      onChange={(e) => setSignupVillage(e.target.value)}
+                    >
+                      {VILLAGES.map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Password</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>🔒</span>
+                    <input
+                      style={S.input}
+                      type={showPass ? "text" : "password"}
+                      value={signupPassword}
+                      onChange={(e) => { setSignupPassword(e.target.value); setRegisterError(""); }}
+                      placeholder="Min. 4 characters"
+                      required
+                    />
+                    <button
+                      type="button"
+                      style={S.eyeBtn}
+                      onClick={() => setShowPass((v) => !v)}
+                      tabIndex={-1}
+                    >
+                      {showPass ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div style={S.fieldGroup}>
+                  <label style={S.label}>Confirm Password</label>
+                  <div style={S.inputWrap}>
+                    <span style={S.inputIcon}>🔒</span>
+                    <input
+                      style={S.input}
+                      type={showPass ? "text" : "password"}
+                      value={signupConfirm}
+                      onChange={(e) => { setSignupConfirm(e.target.value); setRegisterError(""); }}
+                      placeholder="Re-enter password"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {registerError && (
+                  <div style={S.errorBanner}>⚠️ {registerError}</div>
+                )}
+
+                <button type="submit" style={{ ...S.submitBtn, background: "#2d7a6e" }} disabled={loading}>
+                  {loading ? <span style={S.spinner} /> : "Create Account →"}
+                </button>
+              </form>
+
+              {/* Switch to login */}
+              <div style={S.switchRow}>
+                Already have an account?{" "}
+                <button style={S.switchBtn} onClick={() => switchMode("login")}>
+                  Sign In
+                </button>
+              </div>
+            </>
+          )}
+
         </div>
       </div>
     </div>
@@ -190,13 +357,14 @@ const S = {
   page: {
     minHeight: "100vh",
     display: "flex",
+    flexWrap: "wrap",
     fontFamily: "'Nunito', sans-serif",
     background: "#f4efe6",
   },
 
   // ── Left panel ──
   brand: {
-    flex: "0 0 42%",
+    flex: "1 1 350px",
     background: "linear-gradient(155deg, #162d20 0%, #1e4a30 60%, #2a5240 100%)",
     position: "relative",
     overflow: "hidden",
@@ -257,7 +425,7 @@ const S = {
 
   // ── Right form ──
   formPanel: {
-    flex: 1,
+    flex: "1 1 350px",
     display: "flex", alignItems: "center", justifyContent: "center",
     padding: "40px 32px",
   },
@@ -295,7 +463,6 @@ const S = {
     padding: "0 12px",
     background: "#f4efe6",
     position: "relative",
-    "&::before": { content: '""', flex: 1, height: 1, background: "#ddd5c8" },
   },
 
   fieldGroup: { marginBottom: 16 },
@@ -349,8 +516,23 @@ const S = {
     display: "inline-block",
   },
 
+  // Switch mode
+  switchRow: {
+    marginTop: 20,
+    textAlign: "center",
+    fontSize: 14,
+    color: "#7a9186",
+  },
+  switchBtn: {
+    background: "none", border: "none",
+    color: "#e8732a", fontWeight: 700,
+    cursor: "pointer", fontSize: 14,
+    fontFamily: "'Sora', sans-serif",
+    textDecoration: "underline",
+  },
+
   hint: {
-    marginTop: 28, padding: "14px 16px",
+    marginTop: 20, padding: "14px 16px",
     background: "#f0ece6", borderRadius: 10,
     fontSize: 12, color: "#7a9186", lineHeight: 1.8,
   },

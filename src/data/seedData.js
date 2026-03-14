@@ -1,6 +1,7 @@
 export const SEED_PATIENTS = [
     {
       id: "P001",
+      ashaId: "A001",
       name: "Laishram Devi",
       age: 28,
       village: "Haflong",
@@ -22,6 +23,7 @@ export const SEED_PATIENTS = [
     },
     {
       id: "P002",
+      ashaId: "A001",
       name: "Biren Singh",
       age: 54,
       village: "Maibang",
@@ -43,6 +45,7 @@ export const SEED_PATIENTS = [
     },
     {
       id: "P003",
+      ashaId: "A001",
       name: "Ngangom Tombi",
       age: 8,
       village: "Haflong",
@@ -63,6 +66,7 @@ export const SEED_PATIENTS = [
     },
     {
       id: "P004",
+      ashaId: "A001",
       name: "Chanu Ibemhal",
       age: 35,
       village: "Langting",
@@ -83,6 +87,7 @@ export const SEED_PATIENTS = [
     },
     {
       id: "P005",
+      ashaId: "A001",
       name: "Hemanta Basumatary",
       age: 62,
       village: "Umrangso",

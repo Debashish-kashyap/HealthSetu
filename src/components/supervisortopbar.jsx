@@ -1,32 +1,44 @@
 import { useState } from "react";
 import { useAuth } from "../auth/authcontext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function SupervisorTopBar({ activeTab, onTabChange }) {
   const { user, logout } = useAuth();
+  const { t, toggleLanguage, language } = useLanguage();
   const [showMenu, setShowMenu] = useState(false);
 
   const TABS = [
-    { id: "overview",  label: "Overview",       icon: "📊" },
-    { id: "patients",  label: "All Patients",   icon: "👥" },
-    { id: "villages",  label: "Village Map",    icon: "🗺️" },
-    { id: "alerts",    label: "Alerts",         icon: "🚨" },
+    { id: "overview",  label: t("sup.tab.overview"), icon: "📊" },
+    { id: "patients",  label: t("sup.tab.patients"), icon: "👥" },
+    { id: "villages",  label: t("sup.tab.villages"), icon: "🗺️" },
+    { id: "alerts",    label: t("sup.tab.alerts"),   icon: "🚨" },
   ];
 
   return (
     <header style={S.wrap}>
+      <style>{`
+        @media(max-width: 600px){
+          .hide-mobile { display: none !important; }
+          .top-row { padding: 12px 16px !important; }
+          .tabs-nav { padding: 0 10px !important; }
+        }
+      `}</style>
       {/* Top row */}
-      <div style={S.top}>
+      <div className="top-row" style={S.top}>
         <div style={S.brand}>
           <div style={S.logo}>HS</div>
           <div>
-            <div style={S.title}>HealthSetu NER</div>
-            <div style={S.sub}>Supervisor Dashboard · {user?.district}</div>
+            <div style={S.title}>{t("app.title")}</div>
+            <div className="hide-mobile" style={S.sub}>{t("app.subtitle.supervisor")} · {user?.district}</div>
           </div>
         </div>
 
         <div style={S.right}>
-          <div style={S.officerBadge}>
-            <span style={{ fontSize: 11, opacity: 0.7 }}>{user?.designation}</span>
+          <button onClick={toggleLanguage} style={S.langSwitcher}>
+            {language === "en" ? "A / অ" : "A / EN"}
+          </button>
+          <div className="hide-mobile" style={S.officerBadge}>
+            <span style={{ fontSize: 11, opacity: 0.7 }}>{t("sup.role") /* override exact "MOU" in demo if desired, else stick to user role */}</span>
           </div>
 
           <div style={{ position: "relative" }}>
@@ -34,7 +46,7 @@ export default function SupervisorTopBar({ activeTab, onTabChange }) {
               <div style={S.avatar}>{user?.avatar}</div>
               <div>
                 <div style={S.avatarName}>{user?.name}</div>
-                <div style={S.avatarRole}>{user?.designation}</div>
+                <div style={S.avatarRole}>{t("sup.role")}</div>
               </div>
               <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>▾</span>
             </div>
@@ -42,9 +54,9 @@ export default function SupervisorTopBar({ activeTab, onTabChange }) {
             {showMenu && (
               <div style={S.menu}>
                 <div style={S.menuName}>{user?.name}</div>
-                <div style={S.menuRole}>{user?.designation} · {user?.district}</div>
+                <div style={S.menuRole}>{t("sup.role")} · {user?.district}</div>
                 <div style={S.menuDivider} />
-                <button style={S.menuItem} onClick={logout}>🚪 Sign Out</button>
+                <button style={S.menuItem} onClick={logout}>{t("topbar.signOut")}</button>
               </div>
             )}
           </div>
@@ -52,7 +64,7 @@ export default function SupervisorTopBar({ activeTab, onTabChange }) {
       </div>
 
       {/* Tab row */}
-      <nav style={S.tabs}>
+      <nav className="tabs-nav" style={S.tabs}>
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -73,13 +85,14 @@ export default function SupervisorTopBar({ activeTab, onTabChange }) {
 
 const S = {
   wrap: {
-    background: "#0f2318",
+    background: "#162d20",
     position: "sticky", top: 0, zIndex: 100,
     boxShadow: "0 2px 20px rgba(0,0,0,0.3)",
     fontFamily: "'Nunito', sans-serif",
   },
   top: {
     display: "flex", alignItems: "center", justifyContent: "space-between",
+    flexWrap: "wrap", gap: 10,
     padding: "12px 28px",
     borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
@@ -133,10 +146,12 @@ const S = {
 
   tabs: {
     display: "flex", padding: "0 20px",
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
   },
   tab: {
     display: "flex", alignItems: "center", gap: 7,
-    padding: "12px 18px",
+    padding: "12px 18px", flexShrink: 0,
     background: "none", border: "none", borderBottom: "3px solid transparent",
     color: "rgba(255,255,255,0.45)",
     fontFamily: "'Sora',sans-serif", fontSize: 13, fontWeight: 600,
@@ -147,5 +162,17 @@ const S = {
     color: "#5ce0cc",
     borderBottomColor: "#2d7a6e",
     background: "rgba(45,122,110,0.07)",
+  },
+  langSwitcher: {
+    background: "rgba(255,255,255,0.1)",
+    border: "1px solid rgba(255,255,255,0.2)",
+    color: "white",
+    padding: "5px 10px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontFamily: "'Sora', sans-serif",
+    fontSize: 12,
+    fontWeight: 700,
+    transition: "all 0.2s"
   },
 };

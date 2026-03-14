@@ -1,26 +1,28 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import AshaTopBar from "../components/AshaTopBar";
+import AshaTopBar from "../components/ashatopbar";
 import PatientCard from "../components/PatientCard";
 import PatientDetail from "../components/patientdetails";
 import AddPatientModal from "../components/addpatientmodel";
 import Icon from "../components/Icon";
 import Toast from "../components/Toast";
 import { useAuth } from "../auth/authcontext";
-import { loadPatients, savePatients } from "../utils/storage";
+import { loadPatients, savePatients, saveAshaPatients } from "../utils/storage";
 import { syncToServer } from "../utils/sync";
 import { getBPStatus, getTempStatus, todayLabel, todayISO } from "../utils/helpers";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function AshaDashboard() {
   const { user } = useAuth();
-  const [patients,  setPatients]  = useState(() => loadPatients());
-  const [selected,  setSelected]  = useState(null);
-  const [search,    setSearch]    = useState("");
-  const [filter,    setFilter]    = useState("all"); // all | high-risk | unsynced | pregnancy
-  const [showAdd,   setShowAdd]   = useState(false);
-  const [online,    setOnline]    = useState(navigator.onLine);
-  const [syncing,   setSyncing]   = useState(false);
+  const { t } = useLanguage();
+  const [patients, setPatients] = useState(() => loadPatients().filter(p => p.ashaId === user.id));
+  const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all"); // all | high-risk | unsynced | pregnancy
+  const [showAdd, setShowAdd] = useState(false);
+  const [online, setOnline] = useState(navigator.onLine);
+  const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState(null);
-  const [toast,     setToast]     = useState(null);
+  const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
   const showToast = useCallback((message, type = "info") => {
@@ -30,9 +32,9 @@ export default function AshaDashboard() {
   }, []);
 
   useEffect(() => {
-    const onOnline  = () => { setOnline(true);  showToast("Back online! Data will sync shortly.", "success"); };
+    const onOnline = () => { setOnline(true); showToast("Back online! Data will sync shortly.", "success"); };
     const onOffline = () => { setOnline(false); showToast("Offline — changes saved locally", "info"); };
-    window.addEventListener("online",  onOnline);
+    window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
   }, [showToast]);
@@ -44,7 +46,7 @@ export default function AshaDashboard() {
     setSyncing(true); setSyncError(null);
     const result = await syncToServer(patients);
     if (result.success) {
-      setPatients((prev) => { const u = prev.map((p) => ({ ...p, synced: true })); savePatients(u); return u; });
+      setPatients((prev) => { const u = prev.map((p) => ({ ...p, synced: true })); saveAshaPatients(user.id, u); return u; });
       showToast(`✓ ${result.synced} records synced`, "success");
     } else {
       setSyncError(result.error);
@@ -69,7 +71,7 @@ export default function AshaDashboard() {
       p.condition.toLowerCase().includes(q);
     if (!matchSearch) return false;
     if (filter === "high-risk") return getBPStatus(p.bp) === "danger" || getTempStatus(p.temp) === "danger";
-    if (filter === "unsynced")  return !p.synced;
+    if (filter === "unsynced") return !p.synced;
     if (filter === "pregnancy") return p.condition === "Pregnancy";
     return true;
   });
@@ -82,7 +84,7 @@ export default function AshaDashboard() {
         lastVisit: todayISO(),
         vitalsHistory: [...p.vitalsHistory, { date: todayLabel(), systolic: sys, diastolic: dia, weight }],
       });
-      savePatients(u); return u;
+      saveAshaPatients(user.id, u); return u;
     });
     setSelected((s) => s?.id === id ? { ...s, bp, temp, weight, synced: false } : s);
     showToast("Vitals saved — pending sync", "info");
@@ -95,7 +97,7 @@ export default function AshaDashboard() {
         const has = p.vaccinations.includes(vaccine);
         return { ...p, synced: false, vaccinations: has ? p.vaccinations.filter((v) => v !== vaccine) : [...p.vaccinations, vaccine] };
       });
-      savePatients(u); return u;
+      saveAshaPatients(user.id, u); return u;
     });
     setSelected((s) => {
       if (s?.id !== id) return s;
@@ -105,18 +107,30 @@ export default function AshaDashboard() {
   };
 
   const handleAddPatient = (p) => {
-    setPatients((prev) => { const u = [p, ...prev]; savePatients(u); return u; });
+    p.ashaId = user.id; // Assign to current ASha worker
+    setPatients((prev) => { const u = [p, ...prev]; saveAshaPatients(user.id, u); return u; });
     setShowAdd(false);
     showToast("Patient added — pending sync", "info");
+  };
+
+  const handleDeletePatient = (id) => {
+    if (!window.confirm(t("patient.deleteConfirm"))) return;
+    setPatients((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      saveAshaPatients(user.id, updated);
+      return updated;
+    });
+    setSelected(null);
+    showToast(t("patient.deleted"), "info");
   };
 
   const highRisk = patients.filter((p) => getBPStatus(p.bp) === "danger" || getTempStatus(p.temp) === "danger").length;
 
   const FILTERS = [
-    { id: "all",       label: `All (${patients.length})` },
-    { id: "high-risk", label: `⚠️ High Risk (${highRisk})` },
-    { id: "pregnancy", label: `🤱 Pregnancy (${patients.filter((p) => p.condition === "Pregnancy").length})` },
-    { id: "unsynced",  label: `⏳ Unsynced (${pendingSync})` },
+    { id: "all", label: `${t("asha.filter.all")} (${patients.length})` },
+    { id: "high-risk", label: `${t("asha.filter.highRisk")} (${highRisk})` },
+    { id: "pregnancy", label: `${t("asha.filter.pregnancy")} (${patients.filter((p) => p.condition === "Pregnancy").length})` },
+    { id: "unsynced", label: `${t("asha.filter.unsynced")} (${pendingSync})` },
   ];
 
   return (
@@ -131,29 +145,51 @@ export default function AshaDashboard() {
       {!online && (
         <div className="offline-banner">
           <Icon name="wifiOff" size={14} color="var(--red)" />
-          Offline Mode — All changes saved to this device. Will auto-sync when internet returns.
+          {t("asha.offlineBanner")}
         </div>
       )}
 
       <div style={S.main}>
         {/* Welcome strip */}
-        <div style={S.welcome}>
+        <div className="welcome" style={S.welcome}>
           <div>
-            <h2 style={S.welcomeTitle}>Good morning, {user?.name?.split(" ")[0]} 👋</h2>
-            <p style={S.welcomeSub}>Village: {user?.village} · {new Date().toLocaleDateString("en-IN", { weekday:"long", day:"numeric", month:"long" })}</p>
+            <h2 style={S.welcomeTitle}>{t("asha.welcome")}, {user?.username === "asha_priya" ? t("name.asha_priya") : user?.username === "asha_manju" ? t("name.asha_manju") : user?.name?.split(" ")[0]} 👋</h2>
+            <p style={S.welcomeSub}>{t("asha.village")}: {user?.village} · {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</p>
           </div>
           <button style={S.addBtn} onClick={() => setShowAdd(true)}>
-            <Icon name="plus" size={16} /> New Patient
+            <Icon name="plus" size={16} /> {t("asha.newPatient")}
           </button>
         </div>
+
+        {/* APPMS Government Link */}
+        <a
+          href="https://nhmssd.assam.gov.in/APPMS_2024_25/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "12px 18px", borderRadius: 12,
+            background: "linear-gradient(135deg, #2d7a6e 0%, #1e5c52 100%)",
+            color: "#fff", textDecoration: "none",
+            fontFamily: "'Sora',sans-serif", fontSize: 13, fontWeight: 600,
+            marginBottom: 16, boxShadow: "0 2px 8px rgba(45,122,110,0.25)",
+            transition: "transform 0.15s, box-shadow 0.15s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(45,122,110,0.35)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(45,122,110,0.25)"; }}
+        >
+          <span style={{ fontSize: 22 }}>🏥</span>
+          <span>{t("asha.appmsLink")}</span>
+          <span style={{ marginLeft: "auto", opacity: 0.7, fontSize: 16 }}>↗</span>
+        </a>
 
         {/* Stat chips */}
         <div style={S.chips}>
           {[
-            { label: "Total Patients",  value: patients.length, color: "#e8732a" },
-            { label: "High Risk",       value: highRisk,         color: "#c94040" },
-            { label: "Pregnancies",     value: patients.filter((p) => p.condition === "Pregnancy").length, color: "#8b5cf6" },
-            { label: "Pending Sync",    value: pendingSync,      color: "#d4a843" },
+            { label: t("asha.totalPatients"), value: patients.length, color: "#e8732a" },
+            { label: t("asha.highRisk"), value: highRisk, color: "#c94040" },
+            { label: t("asha.pregnancies"), value: patients.filter((p) => p.condition === "Pregnancy").length, color: "#8b5cf6" },
+            { label: t("asha.pendingSync"), value: pendingSync, color: "#d4a843" },
           ].map((c) => (
             <div key={c.label} style={{ ...S.chip, borderLeftColor: c.color }}>
               <div style={{ ...S.chipValue, color: c.color }}>{c.value}</div>
@@ -182,7 +218,7 @@ export default function AshaDashboard() {
             style={S.searchInput}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, village or condition…"
+            placeholder={t("asha.searchPlaceholder")}
           />
         </div>
 
@@ -200,7 +236,7 @@ export default function AshaDashboard() {
               {displayed.length === 0 && (
                 <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "64px 24px", color: "#7a9186" }}>
                   <div style={{ fontSize: 44, marginBottom: 12, opacity: 0.4 }}>🔍</div>
-                  <div style={{ fontFamily: "'Sora',sans-serif", fontWeight: 600 }}>No patients found</div>
+                  <div style={{ fontFamily: "'Sora',sans-serif", fontWeight: 600 }}>{t("asha.noPatients")}</div>
                 </div>
               )}
             </div>
@@ -212,6 +248,7 @@ export default function AshaDashboard() {
               onClose={() => setSelected(null)}
               onUpdateVitals={handleUpdateVitals}
               onToggleVaccine={handleToggleVaccine}
+              onDelete={handleDeletePatient}
             />
           )}
         </div>
@@ -321,6 +358,7 @@ const CSS = `
     .patient-grid{grid-template-columns:1fr!important;}
     .vitals-grid{grid-template-columns:1fr 1fr;}
     .form-row{grid-template-columns:1fr;}
+    .welcome{flex-direction:column !important; align-items:flex-start !important; gap:12px;}
   }
 `;
 
@@ -334,7 +372,7 @@ const S = {
     border: "1px solid #ebe4d8",
   },
   welcomeTitle: { fontFamily: "'Sora',sans-serif", fontSize: 20, fontWeight: 800, color: "#1a2b22" },
-  welcomeSub:   { fontSize: 13, color: "#7a9186", marginTop: 3 },
+  welcomeSub: { fontSize: 13, color: "#7a9186", marginTop: 3 },
   addBtn: {
     display: "flex", alignItems: "center", gap: 8,
     padding: "10px 18px", borderRadius: 10,
@@ -342,7 +380,7 @@ const S = {
     fontFamily: "'Sora',sans-serif", fontSize: 13, fontWeight: 700,
     cursor: "pointer", boxShadow: "0 4px 12px rgba(232,115,42,0.3)",
   },
-  chips: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 18 },
+  chips: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 12, marginBottom: 18 },
   chip: {
     background: "white", borderRadius: 12, padding: "14px 16px",
     borderLeft: "4px solid", boxShadow: "0 2px 8px rgba(22,45,32,0.07)",

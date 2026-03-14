@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from "./auth/authcontext";
+import { LanguageProvider } from "./context/LanguageContext";
 import LoginPage          from "./pages/LoginPage";
 import AshaDashboard      from "./views/AshaDashboard";
 import SupervisorDashboard from "./views/SupervisorDashboard";
@@ -22,7 +23,9 @@ function AppRouter() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRouter />
+      <LanguageProvider>
+        <AppRouter />
+      </LanguageProvider>
     </AuthProvider>
   );
 }

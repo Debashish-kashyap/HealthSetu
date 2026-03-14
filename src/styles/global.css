@@ -264,4 +264,15 @@ button { font-family: inherit; }
   .dash-grid    { grid-template-columns: 1fr; }
   .vitals-grid  { grid-template-columns: 1fr 1fr; }
   .form-row     { grid-template-columns: 1fr; }
+  .modal        { padding: 20px; width: 100%; max-height: calc(100vh - 32px); }
+}
+
+@media (max-width: 480px) {
+  .stat-grid    { grid-template-columns: 1fr; }
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }

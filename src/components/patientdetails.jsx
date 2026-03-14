@@ -6,13 +6,15 @@ import {
 import Icon from "./icon";
 import { getBPStatus, getTempStatus } from "../utils/helpers";
 import { VACCINES } from "../Config";
+import { useLanguage } from "../context/LanguageContext";
 
-export default function PatientDetail({ patient, onClose, onUpdateVitals, onToggleVaccine }) {
+export default function PatientDetail({ patient, onClose, onUpdateVitals, onToggleVaccine, onDelete }) {
   const [tab,      setTab]      = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [bp,       setBp]       = useState(patient.bp);
   const [temp,     setTemp]     = useState(patient.temp);
   const [weight,   setWeight]   = useState(patient.weight);
+  const { t } = useLanguage();
 
   const bpStatus   = getBPStatus(patient.bp);
   const tempStatus = getTempStatus(patient.temp);
@@ -42,13 +44,28 @@ export default function PatientDetail({ patient, onClose, onUpdateVitals, onTogg
               </div>
               <div className="detail-meta" style={{ marginTop: 2 }}>📞 {patient.phone}</div>
             </div>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={onClose}
-              style={{ color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
-            >
-              <Icon name="close" size={14} /> Close
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                className="btn btn-sm"
+                onClick={() => onDelete(patient.id)}
+                style={{
+                  color: "#ff8080", borderColor: "rgba(255,80,80,0.3)",
+                  background: "rgba(201,64,64,0.15)", border: "1px solid rgba(255,80,80,0.3)",
+                  fontFamily: "'Sora',sans-serif", fontSize: 12, fontWeight: 600,
+                  padding: "5px 12px", borderRadius: 8, cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 5,
+                }}
+              >
+                {t("patient.delete")}
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={onClose}
+                style={{ color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+              >
+                <Icon name="close" size={14} /> Close
+              </button>
+            </div>
           </div>
 
           <div className="detail-tags">

@@ -25,7 +25,7 @@ export const VACCINES = [
 
 export const CONDITIONS = [
   "None", "Hypertension", "Diabetes",
-  "Anemia", "Tuberculosis", "Pregnancy",
+  "Anemia", "Tuberculosis", "Malaria", "Pregnancy",
 ];
 
 export const CONDITION_COLORS = {
@@ -34,5 +34,6 @@ export const CONDITION_COLORS = {
   Diabetes:     "#2d7a6e",
   Anemia:       "#8b5cf6",
   Tuberculosis: "#a0522d",
+  Malaria:      "#1e3d2c",
   None:         "#94a3b8",
 };
