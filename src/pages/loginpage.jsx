@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth, DEMO_USERS } from "../auth/authcontext";
 import { VILLAGES } from "../Config";
+import haflong from "../assets/haflong-landscape.jpg";
 
 // ─── Quick-fill helper shown during hackathon demo ────────────────────────
 const QUICK_LOGINS = [
@@ -85,6 +86,11 @@ export default function LoginPage() {
 
       {/* ── Left brand panel ── */}
       <div style={S.brand}>
+        {/* Background image */}
+        <div style={S.brandBg} />
+        {/* Foggy overlay */}
+        <div style={S.fogOverlay} />
+
         <div style={S.brandInner}>
           <div style={S.logo}>
             <span style={S.logoText}>HS</span>
@@ -111,10 +117,6 @@ export default function LoginPage() {
 
           <div style={S.districtBadge}>📍 Dima Hasao District · Assam</div>
         </div>
-
-        {/* decorative circles */}
-        <div style={{ ...S.circle, width:320, height:320, top:-80, right:-80, opacity:0.06 }} />
-        <div style={{ ...S.circle, width:180, height:180, bottom:60, left:-40, opacity:0.08 }} />
       </div>
 
       {/* ── Right form panel ── */}
@@ -365,7 +367,6 @@ const S = {
   // ── Left panel ──
   brand: {
     flex: "1 1 350px",
-    background: "linear-gradient(155deg, #162d20 0%, #1e4a30 60%, #2a5240 100%)",
     position: "relative",
     overflow: "hidden",
     display: "flex",
@@ -373,9 +374,24 @@ const S = {
     justifyContent: "center",
     padding: "48px 40px",
   },
+  brandBg: {
+    position: "absolute",
+    inset: 0,
+    backgroundImage: `url(${haflong})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 0,
+  },
+  fogOverlay: {
+    position: "absolute",
+    inset: 0,
+    background: "linear-gradient(155deg, rgba(22,45,32,0.82) 0%, rgba(30,74,48,0.72) 40%, rgba(42,82,64,0.65) 100%)",
+    backdropFilter: "blur(2px)",
+    zIndex: 1,
+  },
   brandInner: {
     position: "relative",
-    zIndex: 1,
+    zIndex: 2,
     animation: "fadeUp 0.6s ease both",
   },
   logo: {
