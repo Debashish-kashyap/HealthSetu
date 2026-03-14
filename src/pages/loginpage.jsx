@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth, DEMO_USERS } from "../auth/authcontext";
+import { useAuth, DEMO_USERS } from "../auth/Authcontext";
 import { VILLAGES } from "../Config";
 import haflong from "../assets/haflong-landscape.jpg";
 

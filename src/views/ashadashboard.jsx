@@ -5,7 +5,7 @@ import PatientDetail from "../components/patientdetails";
 import AddPatientModal from "../components/addpatientmodel";
 import Icon from "../components/Icon";
 import Toast from "../components/Toast";
-import { useAuth } from "../auth/authcontext";
+import { useAuth } from "../auth/Authcontext";
 import { loadPatients, savePatients, saveAshaPatients } from "../utils/storage";
 import { syncToServer } from "../utils/sync";
 import { getBPStatus, getTempStatus, todayLabel, todayISO } from "../utils/helpers";

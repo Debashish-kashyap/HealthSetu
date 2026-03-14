@@ -4,7 +4,7 @@ import {
   Tooltip, ResponsiveContainer,
 } from "recharts";
 import SupervisorTopBar from "../components/supervisortopbar";
-import { useAuth } from "../auth/authcontext";
+import { useAuth } from "../auth/Authcontext";
 import { loadPatients } from "../utils/storage";
 import { VILLAGES, CONDITION_COLORS } from "../Config";
 import { getBPStatus, getTempStatus } from "../utils/helpers";

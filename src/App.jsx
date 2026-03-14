@@ -1,4 +1,4 @@
-import { AuthProvider, useAuth } from "./auth/authcontext";
+import { AuthProvider, useAuth } from "./auth/Authcontext";
 import { LanguageProvider } from "./context/LanguageContext";
 import LoginPage          from "./pages/LoginPage";
 import AshaDashboard      from "./views/AshaDashboard";

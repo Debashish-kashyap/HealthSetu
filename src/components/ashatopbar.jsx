@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../auth/authcontext";
+import { useAuth } from "../auth/Authcontext";
 import { useLanguage } from "../context/LanguageContext";
 import Icon from "./Icon";
 
